@@ -8,9 +8,6 @@ import (
 	"github.com/kogisin/gentx-example/config"
 	"github.com/kogisin/gentx-example/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-
 	resty "gopkg.in/resty.v1"
 )
 
@@ -39,16 +36,13 @@ func main() {
 		fmt.Printf("failed to fetch data %s: ", err)
 	}
 
-	var tx types.MsgCreateValidatorTx
-	err = json.Unmarshal(resp.Body(), &tx)
+	var txResp types.MsgCreateValidatorTx
+	err = json.Unmarshal(resp.Body(), &txResp)
 	if err != nil {
 		fmt.Printf("failed to unmarshal tx %s", err)
 	}
 
-	fmt.Println(tx.Tx.Value.Msg)
-	fmt.Println(tx.Tx.Value.Fee)
-	fmt.Println(tx.Tx.Value.Signatures)
-	fmt.Println(tx.Tx.Value.Memo)
+	fmt.Println(txResp)
 
 	// StdTx is a standard way to wrap a Msg with Fee and Signatures.
 	// NOTE: the first signature is the fee payer (Signatures must not be nil).
@@ -59,16 +53,16 @@ func main() {
 	// 	Memo       string         `json:"memo"`
 	// }
 
-	msgs := []sdk.Msg{}
-	fee := auth.NewStdFee(50000,
-		sdk.NewCoins(sdk.NewInt64Coin(tx.Tx.Value.Fee.Amount[0].Denom, tx.Tx.Value.Fee.Amount[0].Amount)),
-	)
-	sigs := auth.StdSignature{
-		PubKey:     []byte(tx.Tx.Value.Signatures[0].PubKey.Value),
-		Signatures: []byte(tx.Tx.Value.Signatures[0].Signature),
-	}
+	// msgs := []sdk.Msg{}
+	// fee := auth.NewStdFee(50000,
+	// 	sdk.NewCoins(sdk.NewInt64Coin(tx.Tx.Value.Fee.Amount[0].Denom, tx.Tx.Value.Fee.Amount[0].Amount)),
+	// )
+	// sigs := auth.StdSignature{
+	// 	PubKey:     []byte(tx.Tx.Value.Signatures[0].PubKey.Value),
+	// 	Signatures: []byte(tx.Tx.Value.Signatures[0].Signature),
+	// }
 
-	stdTx := NewStdTx(msgs, fee, sigs, "")
+	// stdTx := NewStdTx(msgs, fee, sigs, "")
 
 	// check signature, return account with incremented nonce
 	// signBytes := auth.GetSignBytes(chainID, stdTx, signerAccs[i], isGenesis)
