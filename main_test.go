@@ -52,3 +52,50 @@ func TestVerify(t *testing.T) {
 		fmt.Printf("Verified: %t", pubKey.VerifyBytes(signBytes, stdSigs[i].Signature))
 	}
 }
+
+func TestVerify2(t *testing.T) {
+	// -------- failed gentx ---------
+	// var resp = `{"type":"auth/StdTx","value":{"msg":[{"type":"cosmos-sdk/MsgCreateValidator","value":{"description":{"moniker":"Cosmostation","identity":"AE4C403A6E7AA1AC","website":"https://www.cosmostation.io","details":"CØSMOSTATION Validator. Delegate your atoms and Start Earning Staking Rewards"},"commission":{"rate":"0.120000000000000000","max_rate":"0.200000000000000000","max_change_rate":"0.100000000000000000"},"min_self_delegation":"10","delegator_address":"cosmos1clpqr4nrk4khgkxj78fcwwh6dl3uw4ep4tgu9q","validator_address":"cosmosvaloper1clpqr4nrk4khgkxj78fcwwh6dl3uw4epsluffn","pubkey":"cosmosvalconspub1zcjduepq0dc9apn3pz2x2qyujcnl2heqq4aceput2uaucuvhrjts75q0rv5smjjn7v","value":{"denom":"uatom","amount":"30000000000"}}}],"fee":{"amount":null,"gas":"200000"},"signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1","value":"An0yrOygz23oiJQZg63gJSbg4nkrWmHBC02/6Am2oDrS"},"signature":"7tGEPPbDpcw16rYHBZlulA552vn/J6ZBc4XMFzdyYzk5kD5BNWlm+V+5Bh/rzLcrTOCealX1/69g4hRKxM66vA=="}],"memo":""}}`
+
+	// -------- verified gentx ---------
+	var resp = `{"type":"auth/StdTx","value":{"msg":[{"type":"cosmos-sdk/MsgCreateValidator","value":{"description":{"moniker":"Cosmostation","identity":"AE4C403A6E7AA1AC","website":"https://www.cosmostation.io","details":"CØSMOSTATION Validator. Delegate your atoms and Start Earning Staking Rewards"},"commission":{"rate":"0.120000000000000000","max_rate":"0.200000000000000000","max_change_rate":"0.100000000000000000"},"min_self_delegation":"10","delegator_address":"cosmos1clpqr4nrk4khgkxj78fcwwh6dl3uw4ep4tgu9q","validator_address":"cosmosvaloper1clpqr4nrk4khgkxj78fcwwh6dl3uw4epsluffn","pubkey":"cosmosvalconspub1zcjduepq0dc9apn3pz2x2qyujcnl2heqq4aceput2uaucuvhrjts75q0rv5smjjn7v","value":{"denom":"uatom","amount":"30000000000"}}}],"fee":{"amount":null,"gas":"200000"},"signatures":[{"pub_key":{"type":"tendermint/PubKeySecp256k1","value":"An0yrOygz23oiJQZg63gJSbg4nkrWmHBC02/6Am2oDrS"},"signature":"6l0B/lTVJxiKoNmo3F4qH5bRPmA9uh2dL43b9w5beUdODGYEXNSe2DG+rSfjg1JBrBvhFKYTt7Rl/5PpdlgKgg=="}],"memo":""}}`
+
+	var tx sdk.TxResponse
+
+	cdc := codec.New()
+	codec.RegisterCrypto(cdc)
+	cdc.RegisterInterface((*sdk.Msg)(nil), nil)
+	cdc.RegisterInterface((*auth.Account)(nil), nil)
+	cdc.RegisterInterface((*sdk.Tx)(nil), nil)
+	cdc.RegisterConcrete(&auth.StdTx{}, "auth/StdTx", nil)
+	cdc.RegisterConcrete(&staking.MsgCreateValidator{}, "cosmos-sdk/MsgCreateValidator", nil)
+
+	cdc.MustUnmarshalJSON([]byte(resp), &tx)
+
+	fmt.Println(tx)
+	fmt.Println("")
+
+	stdTx := tx.Tx.(*auth.StdTx)
+
+	// stdSigs contains the sequence number, account number, and signatures.
+	stdSigs := stdTx.GetSignatures()
+	for i := 0; i < len(stdSigs); i++ {
+		// TODO: Get signer account from somewhere you trust
+		// ----------- e.g. ------------
+		signer, _ := sdk.AccAddressFromBech32("cosmos1khnuwdpnyv6utvqx3plt3x6makh4ee1tfm6eqe")
+		acc := auth.BaseAccount{
+			Address:       signer,
+			AccountNumber: 21634, // from lcd
+			Sequence:      1,     //from lcd
+			PubKey:        stdSigs[i].PubKey,
+		}
+		// ----------- e.g. ------------
+
+		signBytes := auth.GetSignBytes("cosmoshub-2", *stdTx, &acc, false)
+
+		fmt.Println(string(signBytes))
+
+		pubKey := stdSigs[i].PubKey
+		fmt.Printf("Verified: %t", pubKey.VerifyBytes(signBytes, stdSigs[i].Signature))
+	}
+}
