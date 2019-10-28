@@ -43,31 +43,4 @@ func main() {
 	}
 
 	fmt.Println(txResp)
-
-	// StdTx is a standard way to wrap a Msg with Fee and Signatures.
-	// NOTE: the first signature is the fee payer (Signatures must not be nil).
-	// type StdTx struct {
-	// 	Msgs       []sdk.Msg      `json:"msg"`
-	// 	Fee        StdFee         `json:"fee"`
-	// 	Signatures []StdSignature `json:"signatures"`
-	// 	Memo       string         `json:"memo"`
-	// }
-
-	// msgs := []sdk.Msg{}
-	// fee := auth.NewStdFee(50000,
-	// 	sdk.NewCoins(sdk.NewInt64Coin(tx.Tx.Value.Fee.Amount[0].Denom, tx.Tx.Value.Fee.Amount[0].Amount)),
-	// )
-	// sigs := auth.StdSignature{
-	// 	PubKey:     []byte(tx.Tx.Value.Signatures[0].PubKey.Value),
-	// 	Signatures: []byte(tx.Tx.Value.Signatures[0].Signature),
-	// }
-
-	// stdTx := NewStdTx(msgs, fee, sigs, "")
-
-	// check signature, return account with incremented nonce
-	// signBytes := auth.GetSignBytes(chainID, stdTx, signerAccs[i], isGenesis)
-
-	// Verify
-	// result := pubKeyTest.VerifyBytes(newStdSignBytes, signStdSignMsgBytes)
-
 }
